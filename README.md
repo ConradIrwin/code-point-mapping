@@ -28,3 +28,7 @@ doc1 = automerge.change(doc1, d => {
 
 NOTE: This library assumes that your strings are valid unicode and do not
 contain unpaired surrogates.
+
+### Developing
+
+You can run the tests with `npm test`. To publish a new version, bump the number in `package.json` and `npm publish`.
