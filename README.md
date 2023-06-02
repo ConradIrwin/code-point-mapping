@@ -13,16 +13,16 @@ For example:
 
 ```javascript
 import CodePointMapping from 'code-point-mapping'
-import * as automerge from "@automerge/automerge"
+import * as automerge from '@automerge/automerge'
 
-let doc1 = automerge.from({str: new automerge.Text("😀🎉✈️")})
+let doc1 = automerge.from({ str: new automerge.Text('😀🎉✈️') })
 let cpm = new CodePointMapping(doc1.str)
 
 cpm.indexForCodepoint(1) // => 2
 
 doc1 = automerge.change(doc1, d => {
   d.str.deleteAt(...cpm.deleteAt(0, 2)) // d.str.deleteAt(0, 1)
-  d.str.insertAt(...cpm.insertAt(2, "🧟‍♀️")) // d.str.insertAt(1, "🧟‍♀️")
+  d.str.insertAt(...cpm.insertAt(2, '🧟‍♀️')) // d.str.insertAt(1, ..."🧟‍♀️")
 })
 ```
 

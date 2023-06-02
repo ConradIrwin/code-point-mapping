@@ -5,10 +5,14 @@ type Node = {
   next: Node | undefined
 }
 
-function append(n: Node, str: string): Node {
+function append (n: Node, str: string): Node {
   for (let x of str) {
-    if (x.length === 1 && x.charCodeAt(0) >= 0xD800 && x.charCodeAt(0) <= 0xDFFF) {
-      throw new Error("unpaired surrogate")
+    if (
+      x.length === 1 &&
+      x.charCodeAt(0) >= 0xd800 &&
+      x.charCodeAt(0) <= 0xdfff
+    ) {
+      throw new Error('unpaired surrogate')
     }
     if (n.width === x.length) {
       n.count += 1
@@ -19,11 +23,11 @@ function append(n: Node, str: string): Node {
   return n
 }
 
-function graft(n: Node, m: Node | undefined) {
+function graft (n: Node, m: Node | undefined) {
   while (m && m.count === 0) {
     m = m.next
   }
-  if (m && (m.width === n.width)) {
+  if (m && m.width === n.width) {
     n.count += m.count
     n.next = m.next
   } else {
@@ -31,7 +35,7 @@ function graft(n: Node, m: Node | undefined) {
   }
 }
 
-function split(n: Node | undefined, unitOff: number): [Node, number] {
+function split (n: Node | undefined, unitOff: number): [Node, number] {
   let cpOff = 0
 
   while (n) {
@@ -43,18 +47,18 @@ function split(n: Node | undefined, unitOff: number): [Node, number] {
     }
 
     if (unitOff % n.width) {
-      throw new Error("offset in middle of surrogate")
+      throw new Error('offset in middle of surrogate')
     }
 
     n.next = {
       count: n.count - unitOff / n.width,
       width: n.width,
-      next: n.next,
+      next: n.next
     }
     n.count = unitOff / n.width
     return [n, cpOff + n.count]
   }
-  throw new Error("offset beyond end of string")
+  throw new Error('offset beyond end of string')
 }
 
 // CodePointMapping maintains a mapping between utf-16 code units
@@ -68,7 +72,7 @@ function split(n: Node | undefined, unitOff: number): [Node, number] {
 export default class CodePointMapping {
   private next: Node
 
-  constructor(str: string) {
+  constructor (str: string) {
     this.next = { width: 1, count: 0, next: undefined }
     append(this.next, str)
   }
@@ -76,7 +80,7 @@ export default class CodePointMapping {
   // deleteAt maps the offset and length given in terms of utf-16
   // code units to the same in terms of unicode code points,
   // and updates the mapping appropriately.
-  deleteAt(unitOff: number, unitLen: number): [number, number] {
+  deleteAt (unitOff: number, unitLen: number): [number, number] {
     let [node, cpOff] = split(this.next, unitOff)
     let [endNode, cpLen] = split(node.next, unitLen)
 
@@ -86,18 +90,19 @@ export default class CodePointMapping {
 
   // insertAt maps the offset given in terms of utf-16
   // code units to the same in terms of unicode code points,
+  // splits the string into unicode code points,
   // and updates the mapping appropriately.
-  insertAt(unitOff: number, str: string): [number, string] {
+  insertAt (unitOff: number, str: string): [number, ...string[]] {
     let [node, cpOff] = split(this.next, unitOff)
     let after = node.next
 
     graft(append(node, str), after)
-    return [cpOff, str]
+    return [cpOff, ...str]
   }
 
   // indexOfCodepoint converts the position in terms of unicode
   // code points to utf-16 code units.
-  indexOfCodepoint(cpOff: number): number {
+  indexOfCodepoint (cpOff: number): number {
     let node: Node | undefined = this.next
     let unitOff = 0
     while (node) {
@@ -110,6 +115,6 @@ export default class CodePointMapping {
       node = node.next
     }
 
-    throw new Error("cpOff outside of string")
+    throw new Error('cpOff outside of string')
   }
 }
